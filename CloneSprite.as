@@ -13,14 +13,16 @@ package com.fastframework.module.d3mobile {
 		private var source:Sprite;
 		private var cloneLayer:Sprite;
 		private var spDragging:Sprite;
+		private var dropArea:Sprite;
 		private var clones:Vector.<Sprite>;
 		
-		public function CloneSprite(source:Sprite,sourceClass:Class,cloneLayer:Sprite){
+		public function CloneSprite(source:Sprite,sourceClass:Class,cloneLayer:Sprite,dropArea:Sprite){
 			this.clones = new Vector.<Sprite>();
 			this.source = source;
 			this.sourceClass = sourceClass;
 			this.stage = source.stage;
 			this.cloneLayer = cloneLayer;
+			this.dropArea = dropArea;
 
 			source.addEventListener(Event.REMOVED_FROM_STAGE, kill);
 			source.addEventListener(MouseEvent.MOUSE_DOWN, onSourceClick);
@@ -37,6 +39,7 @@ package com.fastframework.module.d3mobile {
 			this.source=null;
 			this.cloneLayer=null;
 			this.spDragging=null;
+			this.dropArea = null;
 			clones = null;
 		}
 
@@ -91,6 +94,13 @@ package com.fastframework.module.d3mobile {
 
 		private function onMouseUp(e:MouseEvent):void
 		{ 
+			if(spDragging!=null){
+				//test sprite out of dropArea
+				var isSpriteOutBound:Boolean = !this.dropArea.hitTestPoint(e.stageX, e.stageY,true);
+				if(isSpriteOutBound){
+					cloneLayer.removeChild(spDragging);
+				}
+			}
 			stopSpriteDrag();
 		}
 
