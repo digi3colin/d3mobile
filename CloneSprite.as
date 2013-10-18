@@ -41,21 +41,22 @@ package com.fastframework.module.d3mobile {
 		}
 
 		private function onSourceClick(e:MouseEvent):void{
-			addClone();
+			stopSpriteDrag();
+			startSpriteDrag(addClone());
 		}
 
-		private function killClones():void{
+		public function killClones():void{
 			for(var i:int=0;i<clones.length;i++){
+				if(clones[i]==null)continue;
 				cloneLayer.removeChild(clones[i]);
-				clones[i].removeEventListener(TransformGestureEvent.GESTURE_ZOOM, onZoom);
-				clones[i].removeEventListener(TransformGestureEvent.GESTURE_ROTATE, onRotate);
-				clones[i].removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 				clones[i] = null;
 			}
+			this.clones = new Vector.<Sprite>();
 		}
 
-		private function addClone():void{
+		public function addClone():Sprite{
 			var clone:Sprite = new sourceClass();
+			clone.addEventListener(Event.REMOVED_FROM_STAGE, onCloneKill);
             clone.addEventListener(TransformGestureEvent.GESTURE_ZOOM, onZoom);
             clone.addEventListener(TransformGestureEvent.GESTURE_ROTATE, onRotate);
 			clone.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
@@ -64,7 +65,22 @@ package com.fastframework.module.d3mobile {
 
 			clones.push(clone);
 			cloneLayer.addChild(clone);
-			startSpriteDrag(clone);
+			return clone;
+		}
+
+		private function onCloneKill(e:Event):void{
+			var clone:Sprite = e.currentTarget as Sprite;
+			clone.removeEventListener(Event.REMOVED_FROM_STAGE, onCloneKill);
+			clone.removeEventListener(TransformGestureEvent.GESTURE_ZOOM, onZoom);
+			clone.removeEventListener(TransformGestureEvent.GESTURE_ROTATE, onRotate);
+			clone.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+
+			for(var i:int=0;i<clones.length;i++){
+				if(clones[i]===clone){
+					clones[i]=null;
+					break;
+				}
+			}
 		}
 
 		/*translate*/
